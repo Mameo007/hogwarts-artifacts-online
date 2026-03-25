@@ -1,13 +1,9 @@
 package edu.tcu.cs.hogwartsartifactsonline.wizard.dto;
 
-import edu.tcu.cs.hogwartsartifactsonline.wizard.Wizard;
+import jakarta.validation.constraints.NotEmpty;
 
-public class WizardDto(Integer id,
-                       String name,
-                       Integer numberOfArtifacts) {
-
-    @Override
-    public WizardDto convert(Wizard source) {
-        WizardDto wizardDto = new WizardDto(source.getId(), source.getName(), source.getNumberOfArtifacts());
-    }
+public record WizardDto(Integer id,
+                        @NotEmpty(message = "name is required.")
+                        String name,
+                        Integer numberOfArtifacts) {
 }
