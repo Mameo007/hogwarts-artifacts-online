@@ -54,7 +54,7 @@ public class SecurityConfiguration {
         keyPairGenerator.initialize(2048);
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
         this.publicKey = (RSAPublicKey) keyPair.getPublic();
-        this.privateKey = (RSAPrivateKey) keyPair.getPrivate();1
+        this.privateKey = (RSAPrivateKey) keyPair.getPrivate();
     }
 
     @Bean
