@@ -33,9 +33,6 @@ class WizardServiceTest {
     @Mock
     ArtifactRepository artifactRepository;
 
-    @Mock
-    ArtifactRepository artifactRepository;
-
     @InjectMocks
     WizardService wizardService;
 
@@ -204,7 +201,7 @@ class WizardServiceTest {
     }
 
     @Test
-    void testAssignArtifactSuccess(){
+    void testAssignArtifactSuccess() {
         // Given
         Artifact a = new Artifact();
         a.setId("1250808601744904192");
@@ -276,6 +273,5 @@ class WizardServiceTest {
                 .isInstanceOf(ObjectNotFoundException.class)
                 .hasMessage("Could not find artifact with Id 1250808601744904192 :(");
     }
-
 
 }
