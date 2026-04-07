@@ -19,9 +19,9 @@ public class UserService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
 
 
-
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<HogwartsUser> findAll() {
@@ -63,8 +63,9 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return this.userRepository.findByUsername(username) // First, we need to find this user from database
+        return this.userRepository.findByUsername(username) // First, we need to find this user from database.
                 .map(hogwartsUser -> new MyUserPrincipal(hogwartsUser)) // If found, wrap the returned user instance in a MyUserPrincipal instance.
-                .orElseThrow(() -> new UsernameNotFoundException("username " + username + " is not found.")); // Otherwise, throw an exception
+                .orElseThrow(() -> new UsernameNotFoundException("username " + username + " is not found.")); // Otherwise, throw an exception.
     }
+
 }
