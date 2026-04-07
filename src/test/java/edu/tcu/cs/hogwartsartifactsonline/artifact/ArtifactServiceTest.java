@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,19 +23,22 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
+// For JUnit 5, we need to use @ExtendWith.
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles(value = "dev")
 class ArtifactServiceTest {
 
-    @Mock
+    @Mock // @Mock defines a Mockito mock object for ArtifactRepository.
     ArtifactRepository artifactRepository;
 
     @Mock
     IdWorker idWorker;
 
-    @InjectMocks
+    @InjectMocks // The Mockito mock objects for ArtifactRepository and IdWorker will be injected into artifactService.
     ArtifactService artifactService;
 
     List<Artifact> artifacts;
+
 
     @BeforeEach
     void setUp() {
@@ -67,7 +71,7 @@ class ArtifactServiceTest {
         "name": "Invisibility Cloak",
         "description": "An invisibility cloak is used to make the wearer invisible.",
         "imageUrl": "ImageUrl",
-        */
+         */
         Artifact a = new Artifact();
         a.setId("1250808601744904192");
         a.setName("Invisibility Cloak");
@@ -80,7 +84,7 @@ class ArtifactServiceTest {
 
         a.setOwner(w);
 
-        given(this.artifactRepository.findById("1250808601744904192")).willReturn(Optional.of(a)); // Defines the behavior of the mock project
+        given(this.artifactRepository.findById("1250808601744904192")).willReturn(Optional.of(a)); // Define the behavior of the mock object.
 
         // When. Act on the target behavior. When steps should cover the method to be tested.
         Artifact returnedArtifact = this.artifactService.findById("1250808601744904192");
@@ -90,66 +94,66 @@ class ArtifactServiceTest {
         assertThat(returnedArtifact.getName()).isEqualTo(a.getName());
         assertThat(returnedArtifact.getDescription()).isEqualTo(a.getDescription());
         assertThat(returnedArtifact.getImageUrl()).isEqualTo(a.getImageUrl());
-        verify(artifactRepository, times(1)).findById("1250808601744904192");
+        assertThat(returnedArtifact.getOwner()).isNotNull();
 
-
+        // Verify artifactRepository.findById() is called exactly once with "1250808601744904192".
+        verify(this.artifactRepository, times(1)).findById("1250808601744904192");
     }
 
     @Test
-    void testFindByIdNotFound(){
+    void testFindByIdNotFound() {
         // Given
-        given(artifactRepository.findById(Mockito.any(String.class))).willReturn(Optional.empty());
+        given(this.artifactRepository.findById(Mockito.any(String.class))).willReturn(Optional.empty());
 
         // When
-        Throwable thrown = catchThrowable(()->{
-            Artifact returnedArtifact = artifactService.findById("1250808601744904192");
+        Throwable thrown = catchThrowable(() -> {
+            Artifact returnedArtifact = this.artifactService.findById("1250808601744904192");
         });
 
         // Then
         assertThat(thrown)
                 .isInstanceOf(ObjectNotFoundException.class)
                 .hasMessage("Could not find artifact with Id 1250808601744904192 :(");
-        verify(artifactRepository, times(1)).findById("1250808601744904192");
+        verify(this.artifactRepository, times(1)).findById("1250808601744904192");
     }
 
     @Test
-    void testFindAllSuccess(){
+    void testFindAllSuccess() {
         // Given
-        given(artifactRepository.findAll()).willReturn(this.artifacts);
+        given(this.artifactRepository.findAll()).willReturn(this.artifacts);
 
-
-        //When
-        List<Artifact> actualArtifacts = artifactService.findAll();
+        // When
+        List<Artifact> actualArtifacts = this.artifactService.findAll();
 
         // Then
         assertThat(actualArtifacts.size()).isEqualTo(this.artifacts.size());
-        verify(artifactRepository, times(1)).findAll();
+        verify(this.artifactRepository, times(1)).findAll();
     }
 
     @Test
-    void testSaveSuccess(){
+    void testSaveSuccess() {
         // Given
         Artifact newArtifact = new Artifact();
         newArtifact.setName("Artifact 3");
         newArtifact.setDescription("Description...");
         newArtifact.setImageUrl("ImageUrl...");
 
-        given(idWorker.nextId()).willReturn(123456L);
-        given(artifactRepository.save(newArtifact)).willReturn(newArtifact);
+        given(this.idWorker.nextId()).willReturn(123456L);
+        given(this.artifactRepository.save(newArtifact)).willReturn(newArtifact);
 
         // When
-        Artifact savedArtifact = artifactService.save(newArtifact);
+        Artifact savedArtifact = this.artifactService.save(newArtifact);
 
         // Then
         assertThat(savedArtifact.getId()).isEqualTo("123456");
         assertThat(savedArtifact.getName()).isEqualTo(newArtifact.getName());
         assertThat(savedArtifact.getDescription()).isEqualTo(newArtifact.getDescription());
         assertThat(savedArtifact.getImageUrl()).isEqualTo(newArtifact.getImageUrl());
-        verify(artifactRepository, times(1)).save(newArtifact);
+        verify(this.artifactRepository, times(1)).save(newArtifact);
     }
 
     @Test
-    void testUpdateSuccess(){
+    void testUpdateSuccess() {
         // Given
         Artifact oldArtifact = new Artifact();
         oldArtifact.setId("1250808601744904192");
@@ -174,7 +178,6 @@ class ArtifactServiceTest {
         assertThat(updatedArtifact.getDescription()).isEqualTo(update.getDescription());
         verify(this.artifactRepository, times(1)).findById("1250808601744904192");
         verify(this.artifactRepository, times(1)).save(oldArtifact);
-
     }
 
     @Test
@@ -185,19 +188,19 @@ class ArtifactServiceTest {
         update.setDescription("A new description.");
         update.setImageUrl("ImageUrl");
 
-        given(artifactRepository.findById("1250808601744904192")).willReturn(Optional.empty());
+        given(this.artifactRepository.findById("1250808601744904192")).willReturn(Optional.empty());
 
         // When
-        assertThrows(ObjectNotFoundException.class, ()->{
-            artifactService.update("1250808601744904192", update);
+        assertThrows(ObjectNotFoundException.class, () -> {
+            this.artifactService.update("1250808601744904192", update);
         });
 
         // Then
-        verify(artifactRepository, times(1)).findById("1250808601744904192");
+        verify(this.artifactRepository, times(1)).findById("1250808601744904192");
     }
 
     @Test
-    void testDeleteSuccess(){
+    void testDeleteSuccess() {
         // Given
         Artifact artifact = new Artifact();
         artifact.setId("1250808601744904192");
@@ -221,11 +224,12 @@ class ArtifactServiceTest {
         given(this.artifactRepository.findById("1250808601744904192")).willReturn(Optional.empty());
 
         // When
-        assertThrows(org.hibernate.ObjectNotFoundException.class, () -> {
+        assertThrows(ObjectNotFoundException.class, () -> {
             this.artifactService.delete("1250808601744904192");
         });
 
         // Then
         verify(this.artifactRepository, times(1)).findById("1250808601744904192");
     }
+
 }

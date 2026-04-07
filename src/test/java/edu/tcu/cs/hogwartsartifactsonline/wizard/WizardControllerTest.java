@@ -13,9 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
@@ -39,13 +39,14 @@ class WizardControllerTest {
     @Autowired
     ObjectMapper objectMapper;
 
-    @MockitoBean
+    @MockBean
     WizardService wizardService;
 
     List<Wizard> wizards;
 
-    @Value("${api.endpoint.base-url")
+    @Value("${api.endpoint.base-url}")
     String baseUrl;
+
 
     @BeforeEach
     void setUp() throws Exception {
@@ -142,7 +143,7 @@ class WizardControllerTest {
     @Test
     void testFindWizardByIdNotFound() throws Exception {
         // Given. Arrange inputs and targets. Define the behavior of Mock object wizardService.
-        given(this.wizardService.findById(5)).willThrow(new ObjectNotFoundException(5));
+        given(this.wizardService.findById(5)).willThrow(new ObjectNotFoundException("wizard", 5));
 
         // When and then
         this.mockMvc.perform(get(this.baseUrl + "/wizards/5").accept(MediaType.APPLICATION_JSON))
@@ -199,7 +200,7 @@ class WizardControllerTest {
     @Test
     void testUpdateWizardErrorWithNonExistentId() throws Exception {
         // Given. Arrange inputs and targets. Define the behavior of Mock object wizardService.
-        given(this.wizardService.update(eq(5), Mockito.any(Wizard.class))).willThrow(new ObjectNotFoundException(5));
+        given(this.wizardService.update(eq(5), Mockito.any(Wizard.class))).willThrow(new ObjectNotFoundException("wizard", 5));
 
         WizardDto wizardDto = new WizardDto(5, // This id does not exist in the database.
                 "Updated wizard name",
@@ -231,7 +232,7 @@ class WizardControllerTest {
     @Test
     void testDeleteWizardErrorWithNonExistentId() throws Exception {
         // Given. Arrange inputs and targets. Define the behavior of Mock object wizardService.
-        doThrow(new ObjectNotFoundException(5)).when(this.wizardService).delete(5);
+        doThrow(new ObjectNotFoundException("wizard", 5)).when(this.wizardService).delete(5);
 
         // When and then
         this.mockMvc.perform(delete(this.baseUrl + "/wizards/5").accept(MediaType.APPLICATION_JSON))
@@ -279,4 +280,5 @@ class WizardControllerTest {
                 .andExpect(jsonPath("$.message").value("Could not find artifact with Id 1250808601744904199 :("))
                 .andExpect(jsonPath("$.data").isEmpty());
     }
+
 }
